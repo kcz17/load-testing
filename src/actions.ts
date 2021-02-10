@@ -13,7 +13,7 @@
  */
 
 import { group } from "k6";
-import http, { RefinedResponse, ResponseType } from "k6/http";
+import http from "k6/http";
 import { BASE_URL } from "./config";
 
 /**
@@ -36,11 +36,11 @@ export function visitHomepage(): void {
 }
 
 export interface CatalogueResponse {
-  readonly recommenderResponse: RefinedResponse<ResponseType | undefined>;
+  readonly hasRecommendation: boolean;
 }
 
 export function visitCatalogue(
-  responseHandler: (response: CatalogueResponse) => void = noop
+  after: (response: CatalogueResponse) => void = noop
 ): void {
   group("visit catalogue", function () {
     http.get(BASE_URL + "category.html");
@@ -55,8 +55,8 @@ export function visitCatalogue(
       ["GET", BASE_URL + "cart"],
     ]);
 
-    responseHandler({
-      recommenderResponse: response[5],
+    after({
+      hasRecommendation: response[5].status === 200,
     });
   });
 }
