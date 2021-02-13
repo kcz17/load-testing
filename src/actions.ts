@@ -9,7 +9,7 @@
  * encountered.
  */
 
-import { group } from "k6";
+import { fail, group } from "k6";
 import http from "k6/http";
 import { v4 as uuidv4 } from "uuid";
 import { BASE_URL, ITEMS_FOR_CHECKOUT } from "./config";
@@ -54,6 +54,7 @@ export function register(): void {
 
 export interface CatalogueResponse {
   readonly itemIds: string[];
+  readonly total: number;
   readonly recommendationId?: string;
 }
 
@@ -61,7 +62,7 @@ export interface CatalogueResponse {
 /**
  * Loads the catalogue page without further clicks.
  */
-export function visitCatalogue(): CatalogueResponse {
+export function visitCatalogue(page = 1): CatalogueResponse {
   let catalogueResponse: CatalogueResponse;
 
   group("visit catalogue", function () {
@@ -73,13 +74,23 @@ export function visitCatalogue(): CatalogueResponse {
       ["GET", BASE_URL + "catalogue/size?tags="],
       ["GET", BASE_URL + "tags"],
       ["GET", BASE_URL + "recommender"],
-      ["GET", BASE_URL + "catalogue?page=1&size=6&tags="],
+      // @ts-ignore Allow use of http.url, which is missing from types.d.ts.
+      // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/51195
+      ["GET", http.url`${BASE_URL}catalogue?page=${page}&size=6&tags=`],
       ["GET", BASE_URL + "cart"],
     ]);
 
     let itemIds: string[] = [];
     if (response[6].status === 200) {
       itemIds = response[6].json("#.id") as string[];
+      if (itemIds.length === 0) {
+        fail("expected catalogue contains items; actually received none");
+      }
+    }
+
+    let total = 0;
+    if (response[3].status === 200) {
+      total = response[5].json("size") as number;
     }
 
     let recommendationId = undefined;
@@ -87,7 +98,7 @@ export function visitCatalogue(): CatalogueResponse {
       recommendationId = response[5].json("id") as string;
     }
 
-    catalogueResponse = { itemIds, recommendationId };
+    catalogueResponse = { itemIds, total, recommendationId };
   });
 
   // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
@@ -201,5 +212,6 @@ export function addPersonalDetails(): void {
  * details to be filled out is fulfilled.
  */
 export function checkOutCart(): void {
-  http.post("/orders");
+  http.post(BASE_URL + "orders");
+  http.del(BASE_URL + "cart");
 }

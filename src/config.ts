@@ -16,3 +16,4 @@ export const ITEMS_FOR_CHECKOUT: Item[] = [
 ];
 
 export const RECOMMENDATION_CHECKOUT_PROBABILITY = 0.5;
+export const BROWSES_ITEM_PROBABILITY = 0.2;
