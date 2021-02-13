@@ -8,6 +8,17 @@ module.exports = {
   ],
   overrides: [
     {
+      files: ["*.ts"],
+      rules: {
+        "@typescript-eslint/ban-ts-comment": [
+          "warn",
+          {
+            "ts-ignore": "allow-with-description",
+          },
+        ],
+      },
+    },
+    {
       files: ["*.js"],
       rules: {
         "@typescript-eslint/no-var-requires": "off",
