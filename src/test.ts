@@ -13,22 +13,22 @@ export const options: Options = {
     buying: {
       executor: "constant-vus",
       exec: "buying",
-      vus: 5,
-      duration: "10s",
+      vus: 2,
+      duration: "20s",
       tags: { scenario: "buying" },
     },
     browsing: {
       executor: "constant-vus",
       exec: "browsing",
-      vus: 5,
-      duration: "10s",
+      vus: 4,
+      duration: "20s",
       tags: { scenario: "browsing" },
     },
     news: {
       executor: "constant-vus",
       exec: "news",
-      vus: 5,
-      duration: "10s",
+      vus: 2,
+      duration: "20s",
       tags: { scenario: "news" },
     },
   },
@@ -43,14 +43,19 @@ export function setup() {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function buying() {
   actions.visitHomepage();
+  sleep(randomNumberBetweenIncl(2, 5));
+
   actions.register();
-  actions.visitUpdates();
-  let catalogue = actions.visitCatalogue();
+  sleep(randomNumberBetweenIncl(1, 2));
 
   // If a recommendation exists, visit the item, add the item to cart
   // with a specified probability, then return to the catalogue page.
+  let catalogue = actions.visitCatalogue();
   if (catalogue.recommendationId) {
+    sleep(randomNumberBetweenIncl(1, 2));
+
     actions.visitItem(catalogue.recommendationId);
+    sleep(randomNumberBetweenIncl(2, 5));
 
     if (Math.random() <= RECOMMENDATION_CHECKOUT_PROBABILITY) {
       actions.addArbitraryItemToCart();
@@ -61,19 +66,24 @@ export function buying() {
 
   // Click on a random item on the catalogue page.
   actions.visitItem(randomElement(catalogue.itemIds));
+  sleep(randomNumberBetweenIncl(2, 5));
   actions.addArbitraryItemToCart();
+  sleep(randomNumberBetweenIncl(2, 5));
   actions.visitCart();
+  sleep(randomNumberBetweenIncl(2, 5));
   actions.addPersonalDetails();
+  sleep(randomNumberBetweenIncl(2, 5));
   actions.checkOutCart();
-
-  sleep(1);
+  sleep(randomNumberBetweenIncl(2, 5));
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function browsing() {
   actions.visitHomepage();
+  sleep(randomNumberBetweenIncl(2, 5));
 
   let catalogue = actions.visitCatalogue();
+  sleep(randomNumberBetweenIncl(2, 5));
 
   // Calculate the number of pages.
   const pages = Math.ceil(catalogue.total / catalogue.itemIds.length);
@@ -94,6 +104,7 @@ export function browsing() {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function news() {
   actions.visitHomepage();
+  sleep(randomNumberBetweenIncl(2, 5));
   actions.visitUpdates();
-  sleep(1);
+  sleep(randomNumberBetweenIncl(2, 5));
 }
