@@ -151,8 +151,8 @@ export function visitItem(id: string): void {
  * from more than one item to mitigate potential caching effects.
  */
 export function addArbitraryItemToCart(): void {
-  const itemId = randomElement(ITEMS_FOR_CHECKOUT);
-  http.post(BASE_URL + "cart", JSON.stringify({ id: itemId }), {
+  const item = randomElement(ITEMS_FOR_CHECKOUT);
+  http.post(BASE_URL + "cart", JSON.stringify({ id: item.id }), {
     headers: { "Content-Type": "application/json" },
   });
 }
