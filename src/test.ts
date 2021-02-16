@@ -13,22 +13,22 @@ export const options: Options = {
     buying: {
       executor: "constant-vus",
       exec: "buying",
-      vus: 2,
-      duration: "20s",
+      vus: 100,
+      duration: "60s",
       tags: { scenario: "buying" },
     },
     browsing: {
       executor: "constant-vus",
       exec: "browsing",
-      vus: 4,
-      duration: "20s",
+      vus: 200,
+      duration: "60s",
       tags: { scenario: "browsing" },
     },
     news: {
       executor: "constant-vus",
       exec: "news",
-      vus: 2,
-      duration: "20s",
+      vus: 50,
+      duration: "60s",
       tags: { scenario: "news" },
     },
   },
@@ -43,7 +43,7 @@ export function setup() {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function buying() {
   actions.visitHomepage();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
 
   actions.register();
   sleep(randomNumberBetweenIncl(1, 2));
@@ -55,7 +55,7 @@ export function buying() {
     sleep(randomNumberBetweenIncl(1, 2));
 
     actions.visitItem(catalogue.recommendationId);
-    sleep(randomNumberBetweenIncl(2, 5));
+    sleep(randomNumberBetweenIncl(1, 2));
 
     if (Math.random() <= RECOMMENDATION_CHECKOUT_PROBABILITY) {
       actions.addArbitraryItemToCart();
@@ -66,34 +66,38 @@ export function buying() {
 
   // Click on a random item on the catalogue page.
   actions.visitItem(randomElement(catalogue.itemIds));
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
+
   actions.addArbitraryItemToCart();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
+
   actions.visitCart();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
+
   actions.addPersonalDetails();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
+
   actions.checkOutCart();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function browsing() {
   actions.visitHomepage();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
 
   let catalogue = actions.visitCatalogue();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
 
   // Calculate the number of pages.
   const pages = Math.ceil(catalogue.total / catalogue.itemIds.length);
   for (let page = 1; page <= pages; page++) {
     catalogue = actions.visitCatalogue(page);
-    sleep(randomNumberBetweenIncl(3, 7));
+    sleep(randomNumberBetweenIncl(1, 2));
 
     while (Math.random() <= BROWSES_ITEM_PROBABILITY) {
       actions.visitItem(randomElement(catalogue.itemIds));
-      sleep(randomNumberBetweenIncl(3, 7));
+      sleep(randomNumberBetweenIncl(1, 2));
       catalogue = actions.visitCatalogue(page);
     }
   }
@@ -104,7 +108,8 @@ export function browsing() {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function news() {
   actions.visitHomepage();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
+
   actions.visitUpdates();
-  sleep(randomNumberBetweenIncl(2, 5));
+  sleep(randomNumberBetweenIncl(1, 2));
 }
