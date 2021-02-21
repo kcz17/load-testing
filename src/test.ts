@@ -6,42 +6,71 @@ import {
   RECOMMENDATION_CHECKOUT_PROBABILITY,
 } from "./config";
 import { randomElement, randomNumberBetweenIncl } from "./helper";
+import { Counter } from "k6/metrics";
 
 // noinspection JSUnusedGlobalSymbols
 export const options: Options = {
   scenarios: {
     buying: {
-      executor: "constant-vus",
+      executor: "ramping-vus",
       exec: "buying",
-      vus: 100,
-      duration: "60s",
+      startVUs: 0,
+      gracefulRampDown: "1s",
+      stages: [
+        { duration: "15s", target: 20 },
+        { duration: "30s", target: 100 },
+        { duration: "40s", target: 100 },
+        { duration: "20s", target: 20 },
+        { duration: "1s", target: 100 },
+        { duration: "20s", target: 100 },
+        { duration: "1s", target: 10 },
+        { duration: "20s", target: 10 },
+      ],
       tags: { scenario: "buying" },
     },
     browsing: {
-      executor: "constant-vus",
+      executor: "ramping-vus",
       exec: "browsing",
-      vus: 200,
-      duration: "60s",
+      startVUs: 0,
+      gracefulRampDown: "1s",
+      stages: [
+        { duration: "15s", target: 40 },
+        { duration: "30s", target: 200 },
+        { duration: "40s", target: 200 },
+        { duration: "20s", target: 40 },
+        { duration: "1s", target: 200 },
+        { duration: "20s", target: 200 },
+        { duration: "1s", target: 20 },
+        { duration: "20s", target: 20 },
+      ],
       tags: { scenario: "browsing" },
     },
     news: {
-      executor: "constant-vus",
+      executor: "ramping-vus",
       exec: "news",
-      vus: 50,
-      duration: "60s",
+      startVUs: 0,
+      gracefulRampDown: "1s",
+      stages: [
+        { duration: "15s", target: 10 },
+        { duration: "30s", target: 50 },
+        { duration: "40s", target: 50 },
+        { duration: "20s", target: 10 },
+        { duration: "1s", target: 50 },
+        { duration: "20s", target: 50 },
+        { duration: "1s", target: 5 },
+        { duration: "20s", target: 5 },
+      ],
       tags: { scenario: "news" },
     },
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function setup() {
-  // TODO: Register the user using options.vus and
-  // https://community.k6.io/t/how-do-i-parameterize-my-k6-test/26/2
-}
+const itemsCheckedOutCounter = new Counter("items_checked_out");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function buying() {
+  let itemsCheckedOut = 0;
+
   actions.visitHomepage();
   sleep(randomNumberBetweenIncl(1, 2));
 
@@ -59,6 +88,7 @@ export function buying() {
 
     if (Math.random() <= RECOMMENDATION_CHECKOUT_PROBABILITY) {
       actions.addArbitraryItemToCart();
+      itemsCheckedOut++;
     }
 
     catalogue = actions.visitCatalogue();
@@ -70,6 +100,7 @@ export function buying() {
 
   actions.addArbitraryItemToCart();
   sleep(randomNumberBetweenIncl(1, 2));
+  itemsCheckedOut++;
 
   actions.visitCart();
   sleep(randomNumberBetweenIncl(1, 2));
@@ -79,6 +110,7 @@ export function buying() {
 
   actions.checkOutCart();
   sleep(randomNumberBetweenIncl(1, 2));
+  itemsCheckedOutCounter.add(itemsCheckedOut);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
