@@ -10,34 +10,52 @@
  */
 
 import { fail, group } from "k6";
-import http from "k6/http";
+import http, { Response } from "k6/http";
 import { v4 as uuidv4 } from "uuid";
 import { BASE_URL, ITEMS_FOR_CHECKOUT } from "./config";
 import { randomElement } from "./helper";
 
+export interface VisitHomepageResponse {
+  readonly homepageResponse: Response;
+  readonly catalogueResponse: Response;
+  readonly cartResponse: Response;
+}
+
 /**
  * Loads the homepage without further clicks.
  */
-export function visitHomepage(): void {
+export function visitHomepage(): VisitHomepageResponse {
+  let response: VisitHomepageResponse;
+
   group("visit homepage", function () {
-    http.get(BASE_URL);
-    http.batch([
+    const homepageResponse = http.get(BASE_URL);
+    const batchedResponses = http.batch([
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
       ["GET", BASE_URL + "catalogue?size=5"],
       ["GET", BASE_URL + "cart"],
     ]);
+
+    response = {
+      homepageResponse: homepageResponse,
+      catalogueResponse: batchedResponses[3],
+      cartResponse: batchedResponses[4],
+    };
   });
+
+  // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
+  // the anonymous function synchronously.
+  return response;
 }
 
 /**
  * Registers and logs in the user.
  */
-export function register(): void {
+export function register(): Response {
   const username = uuidv4();
   const password = "password";
-  http.post(
+  return http.post(
     BASE_URL + "register",
     JSON.stringify({
       username: username,
@@ -52,22 +70,25 @@ export function register(): void {
   );
 }
 
-export interface CatalogueResponse {
-  readonly itemIds: string[];
-  readonly total: number;
-  readonly recommendationId?: string;
+export interface VisitCatalogueResponse {
+  readonly categoryResponse: Response;
+  readonly catalogueResponse: Response;
+  readonly tagsResponse: Response;
+  readonly recommenderResponse: Response;
+  readonly catalogueWithPageResponse: Response;
+  readonly cartResponse: Response;
 }
 
 // noinspection JSUnusedAssignment
 /**
  * Loads the catalogue page without further clicks.
  */
-export function visitCatalogue(page = 1): CatalogueResponse {
-  let catalogueResponse: CatalogueResponse;
+export function visitCatalogue(page = 1): VisitCatalogueResponse {
+  let response: VisitCatalogueResponse;
 
   group("visit catalogue", function () {
-    http.get(BASE_URL + "category.html");
-    const response = http.batch([
+    const categoryResponse = http.get(BASE_URL + "category.html");
+    const batchedResponses = http.batch([
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
@@ -80,57 +101,106 @@ export function visitCatalogue(page = 1): CatalogueResponse {
       ["GET", BASE_URL + "cart"],
     ]);
 
-    let itemIds: string[] = [];
-    if (response[6].status === 200) {
-      itemIds = response[6].json("#.id") as string[];
-      if (itemIds.length === 0) {
-        fail("expected catalogue contains items; actually received none");
-      }
-    }
-
-    let total = 0;
-    if (response[3].status === 200) {
-      total = response[5].json("size") as number;
-    }
-
-    let recommendationId = undefined;
-    if (response[5].status === 200) {
-      recommendationId = response[5].json("id") as string;
-    }
-
-    catalogueResponse = { itemIds, total, recommendationId };
+    response = {
+      categoryResponse: categoryResponse,
+      catalogueResponse: batchedResponses[3],
+      tagsResponse: batchedResponses[4],
+      recommenderResponse: batchedResponses[5],
+      catalogueWithPageResponse: batchedResponses[6],
+      cartResponse: batchedResponses[7],
+    };
   });
 
   // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
   // the anonymous function synchronously.
-  return catalogueResponse;
+  return response;
+}
+
+export interface ParsedCatalogueResponse {
+  readonly itemIds: string[];
+  readonly total: number;
+  readonly recommendationId?: string;
+}
+
+export function parseCatalogueResponse(
+  response: VisitCatalogueResponse
+): ParsedCatalogueResponse {
+  let itemIds: string[] = [];
+  if (response.catalogueWithPageResponse.status === 200) {
+    itemIds = response.catalogueWithPageResponse.json("#.id") as string[];
+    if (itemIds.length === 0) {
+      fail("expected catalogue contains items; actually received none");
+    }
+  }
+
+  let total = 0;
+  if (response.catalogueResponse.status === 200) {
+    total = response.catalogueResponse.json("size") as number;
+  }
+
+  let recommendationId = undefined;
+  if (response.recommenderResponse.status === 200) {
+    recommendationId = response.recommenderResponse.json("id") as string;
+  }
+
+  return { itemIds, total, recommendationId };
+}
+
+export interface VisitUpdatesResponse {
+  readonly newsStaticResponse: Response;
+  readonly newsDBResponse: Response;
+  readonly cartResponse: Response;
 }
 
 /**
  * Loads the news/updates page without further clicks.
  */
-export function visitUpdates(): void {
+export function visitUpdates(): VisitUpdatesResponse {
+  let response: VisitUpdatesResponse;
+
   group("visit updates", function () {
-    http.get(BASE_URL + "news.html");
-    http.batch([
+    const newsStaticResponse = http.get(BASE_URL + "news.html");
+    const batchedResponses = http.batch([
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
       ["GET", BASE_URL + "news"],
       ["GET", BASE_URL + "cart"],
     ]);
+
+    response = {
+      newsStaticResponse: newsStaticResponse,
+      newsDBResponse: batchedResponses[3],
+      cartResponse: batchedResponses[4],
+    };
   });
+
+  // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
+  // the anonymous function synchronously.
+  return response;
+}
+
+export interface VisitItemResponse {
+  readonly itemStaticResponse: Response;
+  readonly itemDBResponse: Response;
+  readonly recommenderResponse: Response;
+  readonly catalogueResponse: Response;
+  readonly cartResponse: Response;
 }
 
 /**
  * Loads an item's page without further clicks.
  */
-export function visitItem(id: string): void {
+export function visitItem(id: string): VisitItemResponse {
+  let response: VisitItemResponse;
+
   group("visit item", function () {
-    // @ts-ignore Allow use of http.url, which is missing from types.d.ts.
-    // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/51195
-    http.get(http.url`${BASE_URL}detail.html?id=${id}`);
-    http.batch([
+    const itemStaticResponse = http.get(
+      // @ts-ignore Allow use of http.url, which is missing from types.d.ts.
+      // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/51195
+      http.url`${BASE_URL}detail.html?id=${id}`
+    );
+    const batchedResponses = http.batch([
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
@@ -141,7 +211,19 @@ export function visitItem(id: string): void {
       ["GET", BASE_URL + "catalogue?size=3"],
       ["GET", BASE_URL + "cart"],
     ]);
+
+    response = {
+      itemStaticResponse: itemStaticResponse,
+      itemDBResponse: batchedResponses[3],
+      recommenderResponse: batchedResponses[4],
+      catalogueResponse: batchedResponses[5],
+      cartResponse: batchedResponses[6],
+    };
   });
+
+  // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
+  // the anonymous function synchronously.
+  return response;
 }
 
 /**
@@ -150,20 +232,31 @@ export function visitItem(id: string): void {
  * a Sock Shop bug where the checkout has a maximum allowed value. We choose
  * from more than one item to mitigate potential caching effects.
  */
-export function addArbitraryItemToCart(): void {
+export function addArbitraryItemToCart(): Response {
   const item = randomElement(ITEMS_FOR_CHECKOUT);
-  http.post(BASE_URL + "cart", JSON.stringify({ id: item.id }), {
+  return http.post(BASE_URL + "cart", JSON.stringify({ id: item.id }), {
     headers: { "Content-Type": "application/json" },
   });
+}
+
+export interface VisitCartResponse {
+  readonly basketResponse: Response;
+  readonly cartHeaderResponse: Response;
+  readonly cardResponse: Response;
+  readonly addressResponse: Response;
+  readonly catalogueResponse: Response;
+  readonly cartResponse: Response;
 }
 
 /**
  * Loads the cart page without further clicks.
  */
-export function visitCart(): void {
+export function visitCart(): VisitCartResponse {
+  let response: VisitCartResponse;
+
   group("visit cart", function () {
-    http.get(BASE_URL + "basket.html");
-    http.batch([
+    const staticResponse = http.get(BASE_URL + "basket.html");
+    const batchedResponses = http.batch([
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
@@ -173,14 +266,32 @@ export function visitCart(): void {
       ["GET", BASE_URL + "catalogue?size=3"],
       ["GET", BASE_URL + "cart"],
     ]);
+
+    response = {
+      basketResponse: staticResponse,
+      cartHeaderResponse: batchedResponses[3],
+      cardResponse: batchedResponses[4],
+      addressResponse: batchedResponses[5],
+      catalogueResponse: batchedResponses[6],
+      cartResponse: batchedResponses[7],
+    };
   });
+
+  // @ts-ignore: Disable use-before-assign warning as k6 (as of v.0.30.0) runs
+  // the anonymous function synchronously.
+  return response;
+}
+
+export interface AddPersonalDetailsResponse {
+  addressesResponse: Response;
+  cardsResponse: Response;
 }
 
 /**
  * Adds address and card details for the user.
  */
-export function addPersonalDetails(): void {
-  http.post(
+export function addPersonalDetails(): AddPersonalDetailsResponse {
+  const addressesResponse = http.post(
     BASE_URL + "addresses",
     JSON.stringify({
       number: "1",
@@ -194,7 +305,7 @@ export function addPersonalDetails(): void {
     }
   );
 
-  http.post(
+  const cardsResponse = http.post(
     BASE_URL + "cards",
     JSON.stringify({
       longNum: "1234123412341234",
@@ -205,13 +316,21 @@ export function addPersonalDetails(): void {
       headers: { "Content-Type": "application/json" },
     }
   );
+
+  return { addressesResponse, cardsResponse };
+}
+
+export interface CheckOutCartResponse {
+  ordersResponse: Response;
+  cartResponse: Response;
 }
 
 /**
  * Checks out the cart, ensuring that Sock Shop's "bug" of requiring personal
  * details to be filled out is fulfilled.
  */
-export function checkOutCart(): void {
-  http.post(BASE_URL + "orders");
-  http.del(BASE_URL + "cart");
+export function checkOutCart(): CheckOutCartResponse {
+  const ordersResponse = http.post(BASE_URL + "orders");
+  const cartResponse = http.del(BASE_URL + "cart");
+  return { ordersResponse, cartResponse };
 }

@@ -7,6 +7,7 @@ module.exports = {
     fluctuatingSpikes: "./mixedFluctuatingSpikesRamping.ts",
     constantRamping: "./mixedConstantRamping.ts",
     constantRampingArrivalRate: "./mixedConstantRampingArrivalRate.ts",
+    mixedSimple: "./mixedSimple.ts",
   },
   output: {
     path: path.join(__dirname, "dist"),
