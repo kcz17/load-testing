@@ -1,24 +1,26 @@
 import { Options } from "k6/options";
 import { Counter } from "k6/metrics";
 import * as profiles from "./profiles";
+import { Scheduler } from "./scheduler";
+import { HomepageState } from "./models/news";
 
 // noinspection JSUnusedGlobalSymbols
 export const options: Options = {
   scenarios: {
-    buying: {
-      executor: "constant-vus",
-      exec: "buying",
-      vus: 1,
-      duration: "3m",
-      tags: { scenario: "buying" },
-    },
-    browsing: {
-      executor: "constant-vus",
-      exec: "browsing",
-      vus: 1,
-      duration: "3m",
-      tags: { scenario: "browsing" },
-    },
+    // buying: {
+    //   executor: "constant-vus",
+    //   exec: "buying",
+    //   vus: 1,
+    //   duration: "3m",
+    //   tags: { scenario: "buying" },
+    // },
+    // browsing: {
+    //   executor: "constant-vus",
+    //   exec: "browsing",
+    //   vus: 1,
+    //   duration: "3m",
+    //   tags: { scenario: "browsing" },
+    // },
     news: {
       executor: "constant-vus",
       exec: "news",
@@ -43,5 +45,5 @@ export function browsing() {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function news() {
-  profiles.news();
+  Scheduler.run(new HomepageState());
 }

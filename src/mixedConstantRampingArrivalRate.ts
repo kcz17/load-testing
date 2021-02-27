@@ -1,6 +1,8 @@
 import { Options } from "k6/options";
 import { Counter } from "k6/metrics";
 import * as profiles from "./profiles";
+import { Scheduler } from "./scheduler";
+import { HomepageState } from "./models/news";
 
 const GLOBAL_SCALE = 0.2;
 const scaleBuying = (target: number) => Math.floor(GLOBAL_SCALE * target);
@@ -66,5 +68,5 @@ export function browsing() {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function news() {
-  profiles.news();
+  Scheduler.run(new HomepageState());
 }
