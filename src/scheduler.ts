@@ -27,11 +27,11 @@ export interface ModelState {
  * Signals that no further states must be run. The EndState itself must not be
  * run.
  */
-export class EndState implements ModelState {
+export const endState: ModelState = {
   run(): ModelState {
-    fail("Scheduler called EndState.run(); expected no further behaviour.");
-  }
-}
+    fail("Scheduler called endState.run(); expected no further behaviour.");
+  },
+};
 
 // We expect a mean time of five seconds per page is a sensible estimate
 // across the entire website.
@@ -50,7 +50,7 @@ export class Scheduler {
 
     let nextState = start;
     let hasStarted = false;
-    while (!(nextState instanceof EndState)) {
+    while (nextState !== endState) {
       // Skip waiting on the first iteration. Sleep before running the state as
       // we do not want to sleep after receiving an EndState.
       if (hasStarted) {

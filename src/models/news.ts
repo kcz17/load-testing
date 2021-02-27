@@ -1,16 +1,25 @@
 import * as actions from "../actions";
-import { EndState, ModelState } from "../scheduler";
+import { endState, ModelState } from "../scheduler";
+import { check } from "k6";
 
-export class HomepageState implements ModelState {
+const homepageState: ModelState = {
   run(): ModelState {
-    actions.visitHomepage();
-    return new NewsState();
-  }
-}
+    const isResponseNormal = check(actions.visitHomepage().homepageResponse, {
+      "index.html loads": (r) => r.status === 200,
+    });
 
-class NewsState implements ModelState {
+    return isResponseNormal ? newsState : endState;
+  },
+};
+
+const newsState: ModelState = {
   run(): ModelState {
-    actions.visitUpdates();
-    return new EndState();
-  }
-}
+    check(actions.visitUpdates(), {
+      "news.html loads": (r) => r.newsStaticResponse.status === 200,
+      "news entries load": (r) => r.newsDBResponse.status === 200,
+    });
+    return endState;
+  },
+};
+
+export const startState = homepageState;
