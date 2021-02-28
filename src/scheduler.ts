@@ -6,9 +6,9 @@ import { randomNumberBetweenIncl } from "./helper";
  * which cannot be represented by a user behaviour graph.
  */
 export class User {
-  is_logged_in = false;
-  is_personal_details_added = false;
-  cart_total = 0.0;
+  isLoggedIn = false;
+  isPersonalDetailsAdded = false;
+  itemsCheckedOut = 0;
 }
 
 /**
