@@ -43,9 +43,10 @@ export function sampleShouldUserAttrite(responses: Response[]): boolean {
     Math.max(...responses.map((r) => r.timings.duration)) / 1000;
 
   // Sample attrition based on a linear line starting from ~10% chance of
-  // attrition at 3s, rising to ~95% chance of attrition at 10s.
+  // attrition at 3s, rising to ~30% chance of attrition at 10s.
   return (
-    maxResponseTime >= 3 && Math.random() <= 12 * maxResponseTime - 26 / 100
+    maxResponseTime >= 3 &&
+    Math.random() <= (2.86 * maxResponseTime + 1.43) / 100
   );
 }
 
