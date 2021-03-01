@@ -1,9 +1,9 @@
 import { Options } from "k6/options";
 import { Counter } from "k6/metrics";
-import * as profiles from "./profiles";
 import { Scheduler } from "./scheduler";
-import * as browsingModel from "./models/browsing";
-import * as newsModel from "./models/news";
+import { BrowsingContext, BrowsingStartState } from "./models/browsing";
+import { NewsContext, NewsStartState } from "./models/news";
+import { BuyingContext, BuyingStartState, User } from "./models/buying";
 
 const GLOBAL_SCALE = 0.2;
 const scaleBuying = (target: number) => Math.floor(GLOBAL_SCALE * target);
@@ -56,18 +56,31 @@ export const options: Options = {
 };
 
 const itemsCheckedOutCounter = new Counter("items_checked_out");
+const recommendationsCheckedOutCounter = new Counter(
+  "recommendations_checked_out"
+);
+const attritionCounter = new Counter("attrition");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function buying() {
-  profiles.buying(itemsCheckedOutCounter);
+  Scheduler.run(
+    new BuyingStartState(
+      new BuyingContext(
+        new User(),
+        itemsCheckedOutCounter,
+        recommendationsCheckedOutCounter,
+        attritionCounter
+      )
+    )
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function browsing() {
-  Scheduler.run(browsingModel.startState);
+  Scheduler.run(new BrowsingStartState(new BrowsingContext(attritionCounter)));
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function news() {
-  Scheduler.run(newsModel.startState);
+  Scheduler.run(new NewsStartState(new NewsContext(attritionCounter)));
 }

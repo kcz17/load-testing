@@ -14,6 +14,3 @@ export const ITEMS_FOR_CHECKOUT: Item[] = [
   { id: "837ab141-399e-4c1f-9abc-bace40296bac", price: 15.0 },
   { id: "819e1fbf-8b7e-4f6d-811f-693534916a8b", price: 18.0 },
 ];
-
-export const RECOMMENDATION_CHECKOUT_PROBABILITY = 0.5;
-export const BROWSES_ITEM_PROBABILITY = 0.2;

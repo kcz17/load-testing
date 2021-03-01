@@ -1,24 +1,47 @@
 import * as actions from "../actions";
-import { endState, ModelState } from "../scheduler";
+import { endState, ModelState, sampleShouldUserAttrite } from "../scheduler";
 import { check } from "k6";
 import { randomElement } from "../helper";
+import { Counter } from "k6/metrics";
 
-const homepageState: ModelState = {
+export class BrowsingContext {
+  constructor(private attritionCounter: Counter) {}
+
+  incrementAttritionCounter(state: string): void {
+    this.attritionCounter.add(1, { scenario: "browsing", state });
+  }
+}
+
+class HomepageState implements ModelState {
+  constructor(private context: BrowsingContext) {}
+
   run(): ModelState {
-    const isResponseNormal = check(actions.visitHomepage().homepageResponse, {
+    const res = actions.visitHomepage();
+
+    const isResponseNormal = check(res.homepageResponse, {
       "index.html loads": (r) => r.status === 200,
     });
+    if (!isResponseNormal) {
+      return endState;
+    }
 
-    return isResponseNormal ? catalogueState : endState;
-  },
-};
+    if (sampleShouldUserAttrite([res.homepageResponse])) {
+      this.context.incrementAttritionCounter("homepage");
+      return endState;
+    }
 
-const catalogueState: ModelState = {
+    return new CatalogueState(this.context);
+  }
+}
+
+class CatalogueState implements ModelState {
+  constructor(private context: BrowsingContext) {}
+
   run(): ModelState {
-    const response = actions.visitCatalogue();
+    const res = actions.visitCatalogue();
 
     // The user gives up if essential page items do not load.
-    const isResponseNormal = check(response, {
+    const isResponseNormal = check(res, {
       "category.html loads": (r) => r.categoryResponse.status === 200,
       "tags load": (r) => r.tagsResponse.status === 200,
       "catalogue items load": (r) => r.catalogueWithPageResponse.status === 200,
@@ -27,25 +50,35 @@ const catalogueState: ModelState = {
       return endState;
     }
 
-    const catalogue = actions.parseCatalogueResponse(response);
+    const shouldUserAttrite = sampleShouldUserAttrite([
+      res.categoryResponse,
+      res.tagsResponse,
+      res.catalogueWithPageResponse,
+    ]);
+    if (shouldUserAttrite) {
+      this.context.incrementAttritionCounter("catalogue");
+      return endState;
+    }
+
+    const catalogue = actions.parseCatalogueResponse(res);
 
     const BROWSES_ITEM_PROBABILITY = 0.3;
     if (Math.random() <= BROWSES_ITEM_PROBABILITY) {
-      return new ItemState(randomElement(catalogue.itemIds));
+      return new ItemState(this.context, randomElement(catalogue.itemIds));
     } else {
       return endState;
     }
-  },
-};
+  }
+}
 
 class ItemState implements ModelState {
-  constructor(private itemId: string) {}
+  constructor(private context: BrowsingContext, private itemId: string) {}
 
   run(): ModelState {
-    const response = actions.visitItem(this.itemId);
+    const res = actions.visitItem(this.itemId);
 
     // The user gives up if essential page items do not load.
-    const isResponseNormal = check(response, {
+    const isResponseNormal = check(res, {
       "item.html loads": (r) => r.itemStaticResponse.status === 200,
       "item loads": (r) => r.itemDBResponse.status === 200,
     });
@@ -53,13 +86,22 @@ class ItemState implements ModelState {
       return endState;
     }
 
+    const shouldUserAttrite = sampleShouldUserAttrite([
+      res.itemStaticResponse,
+      res.itemDBResponse,
+    ]);
+    if (shouldUserAttrite) {
+      this.context.incrementAttritionCounter("item");
+      return endState;
+    }
+
     const RETURN_TO_CATALOGUE_PROBABILITY = 0.5;
     if (Math.random() <= RETURN_TO_CATALOGUE_PROBABILITY) {
-      return catalogueState;
+      return new CatalogueState(this.context);
     } else {
       return endState;
     }
   }
 }
 
-export const startState = homepageState;
+export const BrowsingStartState = HomepageState;

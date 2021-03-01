@@ -34,7 +34,8 @@ export function visitHomepage(): VisitHomepageResponse {
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
       ["GET", BASE_URL + "catalogue?size=5"],
-      ["GET", BASE_URL + "cart"],
+      // Retrieving cart header should not block the rest of the execution.
+      ["GET", BASE_URL + "cart", null, { timeout: "3s" }],
     ]);
 
     response = {
@@ -98,7 +99,8 @@ export function visitCatalogue(page = 1): VisitCatalogueResponse {
       // @ts-ignore Allow use of http.url, which is missing from types.d.ts.
       // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/51195
       ["GET", http.url`${BASE_URL}catalogue?page=${page}&size=6&tags=`],
-      ["GET", BASE_URL + "cart"],
+      // Retrieving cart header should not block the rest of the execution.
+      ["GET", BASE_URL + "cart", null, { timeout: "3s" }],
     ]);
 
     response = {
@@ -165,7 +167,8 @@ export function visitUpdates(): VisitUpdatesResponse {
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
       ["GET", BASE_URL + "news"],
-      ["GET", BASE_URL + "cart"],
+      // Retrieving cart header should not block the rest of the execution.
+      ["GET", BASE_URL + "cart", null, { timeout: "3s" }],
     ]);
 
     response = {
@@ -209,7 +212,8 @@ export function visitItem(id: string): VisitItemResponse {
       ["GET", http.url`${BASE_URL}catalogue/${id}`],
       ["GET", BASE_URL + "recommender"],
       ["GET", BASE_URL + "catalogue?size=3"],
-      ["GET", BASE_URL + "cart"],
+      // Retrieving cart header should not block the rest of the execution.
+      ["GET", BASE_URL + "cart", null, { timeout: "3s" }],
     ]);
 
     response = {
@@ -260,10 +264,11 @@ export function visitCart(): VisitCartResponse {
       ["GET", BASE_URL + "topbar.html"],
       ["GET", BASE_URL + "navbar.html"],
       ["GET", BASE_URL + "footer.html"],
-      ["GET", BASE_URL + "cart"],
+      ["GET", BASE_URL + "cart", null, { timeout: "3s" }],
       ["GET", BASE_URL + "card"],
       ["GET", BASE_URL + "address"],
       ["GET", BASE_URL + "catalogue?size=3"],
+      // Retrieving cart header should not block the rest of the execution.
       ["GET", BASE_URL + "cart"],
     ]);
 

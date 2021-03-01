@@ -1,15 +1,6 @@
 import { fail, sleep } from "k6";
+import { Response } from "k6/http";
 import { randomNumberBetweenIncl } from "./helper";
-
-/**
- * Keeps track of session state in order to handle user behaviour edge cases
- * which cannot be represented by a user behaviour graph.
- */
-export class User {
-  isLoggedIn = false;
-  isPersonalDetailsAdded = false;
-  itemsCheckedOut = 0;
-}
 
 /**
  * Represents a state in a user behaviour graph.
@@ -20,7 +11,7 @@ export interface ModelState {
    * action.
    * @returns The next state for the scheduler to run.
    */
-  run(user: User): ModelState;
+  run(): ModelState;
 }
 
 /**
@@ -39,6 +30,26 @@ export const defaultWaitTimeSampler = (): number =>
   randomNumberBetweenIncl(2, 7);
 
 /**
+ * Decides whether a user should end their journey based on waiting times.
+ *
+ * @param responses - Responses which affect the user's decision.
+ */
+export function sampleShouldUserAttrite(responses: Response[]): boolean {
+  if (responses.length === 0) {
+    return false;
+  }
+
+  const maxResponseTime =
+    Math.max(...responses.map((r) => r.timings.duration)) / 1000;
+
+  // Sample attrition based on a linear line starting from ~10% chance of
+  // attrition at 3s, rising to ~95% chance of attrition at 10s.
+  return (
+    maxResponseTime >= 3 && Math.random() <= 12 * maxResponseTime - 26 / 100
+  );
+}
+
+/**
  * Schedules {@link ModelState}s.
  */
 export class Scheduler {
@@ -46,8 +57,6 @@ export class Scheduler {
     start: ModelState,
     waitTimeSampler: () => number = defaultWaitTimeSampler
   ): void {
-    const user = new User();
-
     let nextState = start;
     let hasStarted = false;
     while (nextState !== endState) {
@@ -59,7 +68,7 @@ export class Scheduler {
         hasStarted = true;
       }
 
-      nextState = nextState.run(user);
+      nextState = nextState.run();
     }
   }
 }
