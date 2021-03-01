@@ -138,7 +138,6 @@ class ItemState implements ModelState {
     if (Math.random() <= CHECK_OUT_PROBABILITY) {
       const addRes = actions.addArbitraryItemToCart();
       if (!check(addRes, { "item adds to cart": (r) => r.status === 201 })) {
-        console.error(addRes.body, addRes.error, addRes.status);
         return endState;
       }
 
