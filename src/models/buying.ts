@@ -287,7 +287,7 @@ class RecommendationDetourState implements ModelState {
 
     // User looks at the item and decides whether to check out the item.
     sleep(randomNumberBetweenIncl(1, 2));
-    const RECOMMENDATION_CHECKOUT_PROBABILITY = 0.5;
+    const RECOMMENDATION_CHECKOUT_PROBABILITY = 0.8;
     if (Math.random() <= RECOMMENDATION_CHECKOUT_PROBABILITY) {
       const addRes = actions.addArbitraryItemToCart();
       if (!check(addRes, { "item adds to cart": (r) => r.status === 201 })) {
