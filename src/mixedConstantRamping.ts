@@ -5,7 +5,7 @@ import { BrowsingContext, BrowsingStartState } from "./models/browsing";
 import { NewsContext, NewsStartState } from "./models/news";
 import { BuyingContext, BuyingStartState, User } from "./models/buying";
 
-const GLOBAL_SCALE = 2.2;
+const GLOBAL_SCALE = 15;
 const scaleBuying = (target: number) => Math.floor(GLOBAL_SCALE * target);
 const scaleBrowsing = (target: number) => Math.floor(2 * GLOBAL_SCALE * target);
 const scaleNews = (target: number) => Math.floor(0.5 * GLOBAL_SCALE * target);
@@ -20,9 +20,8 @@ export const options: Options = {
       gracefulRampDown: "0s",
       gracefulStop: "0s",
       stages: [
-        { duration: "1m", target: scaleBuying(10) },
-        { duration: "3m", target: scaleBuying(10) },
-        { duration: "20s", target: scaleBuying(1) },
+        { duration: "10s", target: scaleBuying(10) },
+        { duration: "5m", target: scaleBuying(10) },
       ],
       tags: { scenario: "buying" },
     },
@@ -33,9 +32,8 @@ export const options: Options = {
       gracefulRampDown: "0s",
       gracefulStop: "0s",
       stages: [
-        { duration: "1m", target: scaleBrowsing(10) },
-        { duration: "3m", target: scaleBrowsing(10) },
-        { duration: "20s", target: scaleBrowsing(1) },
+        { duration: "10s", target: scaleBrowsing(10) },
+        { duration: "5m", target: scaleBrowsing(10) },
       ],
       tags: { scenario: "browsing" },
     },
@@ -46,9 +44,8 @@ export const options: Options = {
       gracefulRampDown: "0s",
       gracefulStop: "0s",
       stages: [
-        { duration: "1m", target: scaleNews(10) },
-        { duration: "3m", target: scaleNews(10) },
-        { duration: "20s", target: scaleNews(1) },
+        { duration: "10s", target: scaleNews(10) },
+        { duration: "5m", target: scaleNews(10) },
       ],
       tags: { scenario: "news" },
     },
