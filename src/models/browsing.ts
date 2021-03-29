@@ -61,6 +61,13 @@ class CatalogueState implements ModelState {
     }
 
     const catalogue = actions.parseCatalogueResponse(res);
+    const catalogueHasErr = !check(catalogue.hasItemParsingError, {
+      "catalogue items parsed correctly": (hasErr) => !hasErr,
+    });
+    if (catalogueHasErr) {
+      this.context.incrementAttritionCounter("catalogue_parsing_error");
+      return endState;
+    }
 
     const BROWSES_ITEM_PROBABILITY = 0.3;
     if (Math.random() <= BROWSES_ITEM_PROBABILITY) {

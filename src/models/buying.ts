@@ -88,6 +88,14 @@ class CatalogueState implements ModelState {
     }
 
     const catalogue = actions.parseCatalogueResponse(res);
+    const catalogueHasErr = !check(catalogue.hasItemParsingError, {
+      "catalogue items parsed correctly": (hasErr) => !hasErr,
+    });
+    if (catalogueHasErr) {
+      this.context.incrementAttritionCounter("catalogue_parsing_error");
+      return endState;
+    }
+
     if (catalogue.recommendationId && !this.context.hasVisitedRecommendation) {
       this.context.hasVisitedRecommendation = true;
       return new RecommendationDetourState(

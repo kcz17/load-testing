@@ -9,7 +9,7 @@
  * encountered.
  */
 
-import { fail, group } from "k6";
+import { group } from "k6";
 import http, { Response } from "k6/http";
 import { BASE_URL, ITEMS_FOR_CHECKOUT } from "./config";
 import { randomElement } from "./helper";
@@ -136,6 +136,7 @@ export function visitCatalogue(page = 1): VisitCatalogueResponse {
 }
 
 export interface ParsedCatalogueResponse {
+  readonly hasItemParsingError: boolean;
   readonly itemIds: string[];
   readonly total: number;
   readonly recommendationId?: string;
@@ -147,8 +148,8 @@ export function parseCatalogueResponse(
   let itemIds: string[] = [];
   if (response.catalogueWithPageResponse.status === 200) {
     itemIds = response.catalogueWithPageResponse.json("#.id") as string[];
-    if (itemIds.length === 0) {
-      fail("expected catalogue contains items; actually received none");
+    if (itemIds === undefined || itemIds.length === 0) {
+      return { hasItemParsingError: true, itemIds: [], total: 0 };
     }
   }
 
@@ -162,7 +163,7 @@ export function parseCatalogueResponse(
     recommendationId = response.recommenderResponse.json("id") as string;
   }
 
-  return { itemIds, total, recommendationId };
+  return { hasItemParsingError: false, itemIds, total, recommendationId };
 }
 
 export interface VisitUpdatesResponse {
