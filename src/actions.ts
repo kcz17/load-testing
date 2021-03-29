@@ -13,6 +13,7 @@ import { fail, group } from "k6";
 import http, { Response } from "k6/http";
 import { BASE_URL, ITEMS_FOR_CHECKOUT } from "./config";
 import { randomElement } from "./helper";
+import { b64encode } from "k6/encoding";
 
 export interface VisitHomepageResponse {
   readonly homepageResponse: Response;
@@ -61,7 +62,7 @@ export function login(username: string, password: string): Response {
     }),
     {
       headers: {
-        Authorization: atob(`Basic ${username}:${password}`),
+        Authorization: b64encode(`Basic ${username}:${password}`),
         "Content-Type": "application/json",
       },
     }
