@@ -3,6 +3,7 @@ import { endState, ModelState, sampleShouldUserAttrite } from "../scheduler";
 import * as actions from "../actions";
 import { check, fail, sleep } from "k6";
 import { randomElement, randomNumberBetweenIncl } from "../helper";
+import { getCredentials } from "../credentials";
 
 /**
  * Keeps track of session state in order to handle user behaviour edge cases
@@ -10,7 +11,6 @@ import { randomElement, randomNumberBetweenIncl } from "../helper";
  */
 export class User {
   isLoggedIn = false;
-  isPersonalDetailsAdded = false;
   itemsCheckedOut = 0;
   recommendationsCheckedOut = 0;
 
@@ -196,38 +196,19 @@ class VisitCartState implements ModelState {
     // If the user hasn't been previously logged in and added their personal
     // details, do so now.
     if (!this.context.user.isLoggedIn) {
-      const res = actions.register();
+      const credentials = getCredentials(__VU);
+      const res = actions.login(credentials.username, credentials.password);
       const isResponseNormal = check(res, {
-        "registers successfully": (r) => r.status === 200,
+        "logged in successfully": (r) => r.status === 200,
       });
       if (!isResponseNormal) return endState;
 
       if (sampleShouldUserAttrite([res])) {
-        this.context.incrementAttritionCounter("cart_register");
+        this.context.incrementAttritionCounter("cart_login");
         return endState;
       }
 
       this.context.user.isLoggedIn = true;
-    }
-
-    if (!this.context.user.isPersonalDetailsAdded) {
-      const res = actions.addPersonalDetails();
-      const isResponseNormal = check(res, {
-        "address added successfully": (r) => r.addressesResponse.status === 200,
-        "card added successfully": (r) => r.cardsResponse.status === 200,
-      });
-      if (!isResponseNormal) return endState;
-
-      const shouldUserAttrite = sampleShouldUserAttrite([
-        res.addressesResponse,
-        res.cardsResponse,
-      ]);
-      if (shouldUserAttrite) {
-        this.context.incrementAttritionCounter("cart_personal_details");
-        return endState;
-      }
-
-      this.context.user.isPersonalDetailsAdded = true;
     }
 
     return new CheckOutCartState(this.context);

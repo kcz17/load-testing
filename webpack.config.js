@@ -9,6 +9,7 @@ module.exports = {
     mixedConstantRampingArrivalRate: "./mixedConstantRampingArrivalRate.ts",
     mixedSimple: "./mixedSimple.ts",
     training: "./training.ts",
+    seed: "./seed.ts",
   },
   output: {
     path: path.join(__dirname, "dist"),

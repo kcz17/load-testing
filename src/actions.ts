@@ -11,7 +11,6 @@
 
 import { fail, group } from "k6";
 import http, { Response } from "k6/http";
-import { v4 as uuidv4 } from "uuid";
 import { BASE_URL, ITEMS_FOR_CHECKOUT } from "./config";
 import { randomElement } from "./helper";
 
@@ -51,11 +50,28 @@ export function visitHomepage(): VisitHomepageResponse {
 }
 
 /**
+ * Logs in the user.
+ */
+export function login(username: string, password: string): Response {
+  return http.post(
+    BASE_URL + "login",
+    JSON.stringify({
+      username: username,
+      password: password,
+    }),
+    {
+      headers: {
+        Authorization: atob(`Basic ${username}:${password}`),
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+
+/**
  * Registers and logs in the user.
  */
-export function register(): Response {
-  const username = uuidv4();
-  const password = "password";
+export function register(username: string, password: string): Response {
   return http.post(
     BASE_URL + "register",
     JSON.stringify({
