@@ -207,7 +207,7 @@ class VisitCartState implements ModelState {
       const credentials = getCredentials(__VU);
       const res = actions.login(credentials.username, credentials.password);
       const isResponseNormal = check(res, {
-        "logged in successfully": (r) => r.status === 200,
+        "logged in successfully": (r) => r.status === 304,
       });
       if (!isResponseNormal) return endState;
 

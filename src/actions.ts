@@ -54,19 +54,12 @@ export function visitHomepage(): VisitHomepageResponse {
  * Logs in the user.
  */
 export function login(username: string, password: string): Response {
-  return http.post(
-    BASE_URL + "login",
-    JSON.stringify({
-      username: username,
-      password: password,
-    }),
-    {
-      headers: {
-        Authorization: b64encode(`Basic ${username}:${password}`),
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  return http.get(BASE_URL + "login", {
+    headers: {
+      Authorization: b64encode(`Basic ${username}:${password}`),
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 /**
