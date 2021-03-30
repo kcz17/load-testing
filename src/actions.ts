@@ -56,7 +56,7 @@ export function visitHomepage(): VisitHomepageResponse {
 export function login(username: string, password: string): Response {
   return http.get(BASE_URL + "login", {
     headers: {
-      Authorization: b64encode(`Basic ${username}:${password}`),
+      Authorization: "Basic " + b64encode(`${username}:${password}`),
       "Content-Type": "application/json",
     },
   });
