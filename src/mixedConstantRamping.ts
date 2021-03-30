@@ -5,7 +5,7 @@ import { BrowsingContext, BrowsingStartState } from "./models/browsing";
 import { NewsContext, NewsStartState } from "./models/news";
 import { BuyingContext, BuyingStartState, User } from "./models/buying";
 
-const GLOBAL_SCALE = 15;
+const GLOBAL_SCALE = 2.2;
 const RAMP_UP_TIME = "10s";
 const CONSTANT_TIME = "5m";
 const scaleBuying = (target: number) => Math.floor(GLOBAL_SCALE * target);
