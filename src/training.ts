@@ -16,7 +16,7 @@ export const options: Options = {
       // maxVUs is higher than the VUs to be trained with.
       maxVUs: 100,
       // Duration is higher than the training duration.
-      duration: "10h",
+      duration: "20h",
     },
   },
 };
