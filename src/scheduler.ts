@@ -1,7 +1,6 @@
 import { fail, sleep } from "k6";
 import { Response } from "k6/http";
 import { randomNumberBetweenIncl } from "./helper";
-import { deleteCart } from "./actions";
 
 /**
  * Represents a state in a user behaviour graph.
@@ -72,8 +71,5 @@ export class Scheduler {
 
       nextState = nextState.run();
     }
-
-    // Delete the cart as the last action.
-    deleteCart();
   }
 }

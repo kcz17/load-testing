@@ -355,7 +355,3 @@ export function checkOutCart(): CheckOutCartResponse {
   const cartResponse = http.del(BASE_URL + "cart");
   return { ordersResponse, cartResponse };
 }
-
-export function deleteCart(): Response {
-  return http.del(BASE_URL + "cart");
-}
