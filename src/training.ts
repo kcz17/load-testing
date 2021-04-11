@@ -14,7 +14,7 @@ export const options: Options = {
       // vus will be ramped up externally.
       vus: 0,
       // maxVUs is higher than the VUs to be trained with.
-      maxVUs: 100,
+      maxVUs: 200,
       // Duration is higher than the training duration.
       duration: "20h",
     },
@@ -32,13 +32,13 @@ export function scenario() {
   // The externally-controlled runner only allows for one scenario, so we
   // sample scenarios based on probabilities corresponding to
   // mixedConstantRamping.ts.
-  const probabilityBuying = 1 / 3.5;
-  const probabilityBrowsing = 2 / 3.5;
+  const probabilityBuying = 2 / 7;
+  const probabilityBrowsing = 4 / 7;
   // @ts-ignore Include unused variable for visibility.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const probabilityNews = 0.5 / 3.5;
+  const probabilityNews = 1 / 7;
 
-  const sampler = Math.random();
+  const sampler = (__VU % 7) / 7;
   if (sampler <= probabilityBuying) {
     buying();
   } else if (sampler <= probabilityBuying + probabilityBrowsing) {
