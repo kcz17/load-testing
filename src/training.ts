@@ -29,9 +29,6 @@ const attritionCounter = new Counter("attrition");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function scenario() {
-  // The externally-controlled runner only allows for one scenario, so we
-  // sample scenarios based on probabilities corresponding to
-  // mixedConstantRamping.ts.
   const probabilityBuying = 2 / 7;
   const probabilityBrowsing = 4 / 7;
   // @ts-ignore Include unused variable for visibility.
@@ -39,9 +36,9 @@ export function scenario() {
   const probabilityNews = 1 / 7;
 
   const sampler = (__VU % 7) / 7;
-  if (sampler <= probabilityBuying) {
+  if (sampler < probabilityBuying) {
     buying();
-  } else if (sampler <= probabilityBuying + probabilityBrowsing) {
+  } else if (sampler < probabilityBuying + probabilityBrowsing) {
     browsing();
   } else {
     news();
