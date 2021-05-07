@@ -4,10 +4,9 @@ module.exports = {
   mode: "development",
   context: path.join(__dirname, "src"),
   entry: {
-    mixedFluctuatingSpikes: "./mixedFluctuatingSpikesRamping.ts",
-    mixedConstantRamping: "./mixedConstantRamping.ts",
-    mixedConstantRampingArrivalRate: "./mixedConstantRampingArrivalRate.ts",
-    mixedSimple: "./mixedSimple.ts",
+    constantLoad: "./constantLoad.ts",
+    constantLoadExternallyOrchestrated:
+      "./constantLoadExternallyOrchestrated.ts",
     training: "./training.ts",
     seed: "./seed.ts",
   },

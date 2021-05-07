@@ -5,9 +5,9 @@ import { BrowsingContext, BrowsingStartState } from "./models/browsing";
 import { NewsContext, NewsStartState } from "./models/news";
 import { BuyingContext, BuyingStartState, User } from "./models/buying";
 
-const MAX_VUS = 122;
-const RAMP_UP_TIME = "10s";
-const CONSTANT_TIME = "5m";
+const MAX_VUS = Number(__ENV.MAX_VUS) ?? 122;
+const RAMP_UP_TIME = __ENV.RAMP_UP_TIME ?? "10s";
+const CONSTANT_TIME = __ENV.CONSTANT_TIME ?? "5m";
 
 // noinspection JSUnusedGlobalSymbols
 export const options: Options = {
