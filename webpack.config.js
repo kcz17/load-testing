@@ -7,6 +7,9 @@ module.exports = {
     constantLoad: "./constantLoad.ts",
     constantLoadExternallyOrchestrated:
       "./constantLoadExternallyOrchestrated.ts",
+    flashCrowd: "./flashCrowd.ts",
+    flashCrowdExternallyOrchestrated:
+      "./flashCrowdExternallyOrchestrated.ts",
     training: "./training.ts",
     seed: "./seed.ts",
   },
