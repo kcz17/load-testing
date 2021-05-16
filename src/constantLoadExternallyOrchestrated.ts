@@ -8,6 +8,7 @@ import { BuyingContext, BuyingStartState, User } from "./models/buying";
 const MAX_VUS = Number(__ENV.MAX_VUS ?? 122);
 const RAMP_UP_TIME = __ENV.RAMP_UP_TIME ?? "10s";
 const CONSTANT_TIME = __ENV.CONSTANT_TIME ?? "5m";
+const OVERRIDE_ALL_SCENARIOS = __ENV.OVERRIDE_ALL_SCENARIOS ?? "";
 
 const OUTPUT_PATH = __ENV.K6_OUTPUT_PATH ?? "";
 if (OUTPUT_PATH == "") {
@@ -39,6 +40,17 @@ const attritionCounter = new Counter("attrition");
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function scenario() {
+  if (OVERRIDE_ALL_SCENARIOS == "buying") {
+    buying();
+    return;
+  } else if (OVERRIDE_ALL_SCENARIOS == "browsing") {
+    browsing();
+    return;
+  } else if (OVERRIDE_ALL_SCENARIOS == "news") {
+    news();
+    return;
+  }
+
   const probabilityBuying = 2 / 7;
   const probabilityBrowsing = 4 / 7;
   // @ts-ignore Include unused variable for visibility.
