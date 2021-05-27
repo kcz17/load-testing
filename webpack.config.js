@@ -7,9 +7,10 @@ module.exports = {
     constantLoad: "./constantLoad.ts",
     constantLoadExternallyOrchestrated:
       "./constantLoadExternallyOrchestrated.ts",
+    constantLoadSwitchHalfwayExternallyOrchestrated:
+      "./constantLoadSwitchHalfwayExternallyOrchestrated.ts",
     flashCrowd: "./flashCrowd.ts",
-    flashCrowdExternallyOrchestrated:
-      "./flashCrowdExternallyOrchestrated.ts",
+    flashCrowdExternallyOrchestrated: "./flashCrowdExternallyOrchestrated.ts",
     training: "./training.ts",
     seed: "./seed.ts",
   },
